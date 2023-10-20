@@ -1,23 +1,23 @@
 /// Computes the even parity bit for a given 8-bit value.
 ///
 /// The even parity bit is calculated to ensure the total number of set bits
-/// (bits with value 1) in the input `k_bit` is even. If the number of set bits
+/// (bits with value 1) in the input `dataword` is even. If the number of set bits
 /// is odd, the parity bit is set to 1 to make it even.
 ///
 /// # Arguments
 ///
-/// * `k_bit`: An 8-bit value for which the even parity bit will be computed.
+/// * `dataword`: An 8-bit value for which the even parity bit will be computed.
 ///
 /// # Returns
 ///
-/// An unsigned 16-bit integer where the lower 8 bits contain the original `k_bit`
+/// An unsigned 16-bit integer where the lower 8 bits contain the original `dataword`
 /// value, and the highest bit (bit 15) contains the computed even parity bit.
 ///
 /// # Example
 ///
 /// ```rust
-/// let k_bit: u8 = 0b10110100;
-/// let result = compute_even_parity_bit(k_bit);
+/// let dataword: u8 = 0b10110100;
+/// let result = compute_even_parity_bit(dataword);
 ///
 /// // The result should be a 16-bit value with even parity bit set.
 /// assert_eq!(result, 0b101101000);
@@ -27,8 +27,8 @@
 ///
 /// This function is typically used for error detection and correction in data
 /// transmission systems.
-pub fn compute_even_parity_bit(k_bit: u8) -> u16 {
-    let set_bits = k_bit.count_ones();
+pub fn compute_even_parity_bit(dataword: u8) -> u16 {
+    let set_bits = dataword.count_ones();
     let parity_bit = {
         if set_bits % 2 == 0 {
             0
@@ -36,39 +36,19 @@ pub fn compute_even_parity_bit(k_bit: u8) -> u16 {
             1
         }
     };
-    (u16::from(k_bit) << 1) | parity_bit
+    (u16::from(dataword) << 1) | parity_bit
 }
 
-/// Checks the parity bit of a received codeword to verify data integrity.
-///
-/// This function calculates the expected codeword using the provided original K-bit
-/// and checks it against the received N-bit to determine if the data is valid.
-///
-/// # Arguments
-///
-/// * `original_k_bit` - The original K-bit used for codeword generation.
-/// * `received_n_bit` - The received N-bit to be compared against the expected codeword.
-///
-/// # Returns
-///
-/// * `true` if the received N-bit matches the expected codeword, indicating data integrity.
-/// * `false` if there is a mismatch, indicating potential data corruption.
-///
-/// # Examples
-///
-/// ```
-/// use simple_parity_check::{check_parity_bit, compute_even_parity_bit};
-///
-/// let original_k_bit: u8 = 0b10010010;
-/// let received_n_bit: u16 = 0b100100101;
-///
-/// let is_data_valid = check_parity_bit(original_k_bit, received_n_bit);
-///
-/// assert_eq!(is_data_valid, true);
-/// ```
-pub fn check_parity_bit(original_k_bit: u8, received_n_bit: u16) -> bool {
-    let codeword: u16 = compute_even_parity_bit(original_k_bit);
-    return codeword == received_n_bit;
+pub fn verify_received_codeword(received_codeword: u16) -> bool {
+    if received_codeword.count_ones() % 2 != 0 {
+        return false;
+    } else {
+        true
+    }
+}
+
+pub fn acquire_dataword(received_codeword: u16) -> u8 {
+    return (received_codeword >> 1) as u8;
 }
 
 #[cfg(test)]
@@ -93,9 +73,18 @@ mod tests {
     }
 
     #[test]
-    fn test_check_parity_bit() {
-        assert_eq!(check_parity_bit(0b10010010, 0b100000101), false);
-        assert_eq!(check_parity_bit(0b10010010, 0b100100101), true);
-        assert_eq!(check_parity_bit(0b101, 0b1010), true);
+    fn test_verify_received_codeword() {
+        assert_eq!(verify_received_codeword(0b101010100), true);
+        assert_eq!(verify_received_codeword(0b111111110), true);
+        assert_eq!(verify_received_codeword(0b000000000), true);
+
+        assert_eq!(verify_received_codeword(0b111111111), false);
+        assert_eq!(verify_received_codeword(0b101010101), false);
+        assert_eq!(verify_received_codeword(0b000000001), false);
+    }
+
+    #[test]
+    fn test_acquire_dataword() {
+        assert_eq!(acquire_dataword(0b111100000), 0b11110000);
     }
 }

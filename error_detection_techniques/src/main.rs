@@ -66,7 +66,7 @@ fn simple_parity_check_ui() {
     let mut byte_input;
 
     byte_input = user_input_handler(String::from("Input A: "));
-    let original_k_bit: u8 = match u8::from_str_radix(byte_input.trim(), 2) {
+    let dataword: u8 = match u8::from_str_radix(byte_input.trim(), 2) {
         Ok(byte) => byte,
         Err(_) => {
             eprintln!("Please enter a valid 8-bit integer.");
@@ -75,7 +75,7 @@ fn simple_parity_check_ui() {
     };
 
     byte_input = user_input_handler(String::from("Input B: "));
-    let received_n_bit: u16 = match u16::from_str_radix(byte_input.trim(), 2) {
+    let received_codeword: u16 = match u16::from_str_radix(byte_input.trim(), 2) {
         Ok(byte) => byte,
         Err(_) => {
             eprintln!("Please enter a valid 8-bit integer.");
@@ -83,7 +83,7 @@ fn simple_parity_check_ui() {
         }
     };
 
-    let codeword: u16 = simple_parity_check::compute_even_parity_bit(original_k_bit);
+    let codeword: u16 = simple_parity_check::compute_even_parity_bit(dataword);
 
     println!("@Sender");
     print!("Codeword: {:b}", codeword);
@@ -91,7 +91,7 @@ fn simple_parity_check_ui() {
     println!("@Receiver");
     print!("Data word: ");
     // Compare received n-bit to the codeword
-    if simple_parity_check::check_parity_bit(original_k_bit, received_n_bit) {
+    if simple_parity_check::verify_received_codeword(received_codeword) {
         println!("Accepted");
     } else {
         println!("Discarded");
