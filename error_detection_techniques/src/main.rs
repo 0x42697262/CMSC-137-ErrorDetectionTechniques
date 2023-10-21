@@ -98,7 +98,24 @@ fn simple_parity_check_ui() {
     }
 }
 
-fn two_dimensional_parity_check_ui() {}
+fn two_dimensional_parity_check_ui() {
+    let byte_input;
+
+    byte_input = user_input_handler(String::from("Input A: "));
+    let data_stream: u64 = match u64::from_str_radix(byte_input.trim(), 2) {
+        Ok(byte) => byte,
+        Err(_) => {
+            eprintln!("Please enter a valid 8-bit integer.");
+            std::process::exit(1);
+        }
+    };
+
+    let errors: u8 = two_dimensional_parity_check::count_errors(
+        &two_dimensional_parity_check::decompose_data_stream(data_stream, 9),
+    );
+
+    println!("Error count: {}", errors);
+}
 
 fn checksum_ui() {}
 fn cyclic_redundancy_check_ui() {}
