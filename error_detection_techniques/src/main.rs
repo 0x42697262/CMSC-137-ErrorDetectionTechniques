@@ -91,7 +91,7 @@ fn simple_parity_check_ui() {
     println!("@Receiver");
     print!("Data word: ");
     // Compare received n-bit to the codeword
-    if simple_parity_check::verify_received_codeword(received_codeword) {
+    if simple_parity_check::check_syndrome(received_codeword) == 0 {
         println!("Accepted");
     } else {
         println!("Discarded");

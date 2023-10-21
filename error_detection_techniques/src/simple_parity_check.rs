@@ -39,16 +39,12 @@ pub fn compute_even_parity_bit(dataword: u8) -> u16 {
     (u16::from(dataword) << 1) | parity_bit
 }
 
-pub fn verify_received_codeword(received_codeword: u16) -> bool {
-    if received_codeword.count_ones() % 2 != 0 {
-        return false;
+pub fn check_syndrome(received_codeword: u16) -> u8 {
+    if received_codeword.count_ones() % 2 == 0 {
+        0
     } else {
-        true
+        1
     }
-}
-
-pub fn acquire_dataword(received_codeword: u16) -> u8 {
-    return (received_codeword >> 1) as u8;
 }
 
 #[cfg(test)]
@@ -73,18 +69,16 @@ mod tests {
     }
 
     #[test]
-    fn test_verify_received_codeword() {
-        assert_eq!(verify_received_codeword(0b101010100), true);
-        assert_eq!(verify_received_codeword(0b111111110), true);
-        assert_eq!(verify_received_codeword(0b000000000), true);
+    fn test_check_syndrome() {
+        assert_eq!(check_syndrome(0b101010100), 0);
+        assert_eq!(check_syndrome(0b111111110), 0);
+        assert_eq!(check_syndrome(0b000000000), 0);
 
-        assert_eq!(verify_received_codeword(0b111111111), false);
-        assert_eq!(verify_received_codeword(0b101010101), false);
-        assert_eq!(verify_received_codeword(0b000000001), false);
-    }
-
-    #[test]
-    fn test_acquire_dataword() {
-        assert_eq!(acquire_dataword(0b111100000), 0b11110000);
+        assert_eq!(check_syndrome(0b111111111), 1);
+        assert_eq!(check_syndrome(0b101010101), 1);
+        assert_eq!(check_syndrome(0b000000001), 1);
+        assert_eq!(check_syndrome(0b101001111), 0);
+        assert_eq!(check_syndrome(0b101010001), 0);
+        assert_eq!(check_syndrome(0b000000101), 0);
     }
 }
