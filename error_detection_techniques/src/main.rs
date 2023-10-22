@@ -1,6 +1,9 @@
 use std::io;
 use std::io::Write;
 
+use checksum::verify_checksum;
+
+mod checksum;
 mod simple_parity_check;
 mod two_dimensional_parity_check;
 
@@ -117,7 +120,24 @@ fn two_dimensional_parity_check_ui() {
     println!("Error count: {}", errors);
 }
 
-fn checksum_ui() {}
+fn checksum_ui() {
+    let byte_input;
+
+    byte_input = user_input_handler(String::from("Input A: "));
+    let stream: u64 = match u64::from_str_radix(byte_input.trim(), 2) {
+        Ok(byte) => byte,
+        Err(_) => {
+            eprintln!("Please enter a valid 8-bit integer.");
+            std::process::exit(1);
+        }
+    };
+    let checksum: u8 = checksum::verify_checksum(checksum::decompose_stream(stream, 4), 4);
+    if checksum == 0 {
+        println!("Accept Data");
+    } else {
+        println!("Reject Data");
+    }
+}
 fn cyclic_redundancy_check_ui() {}
 
 /// Reads and handles user input, displaying a specified text prompt.
