@@ -4,6 +4,7 @@ use std::io::Write;
 use checksum::verify_checksum;
 
 mod checksum;
+mod cyclic_redundancy_check;
 mod simple_parity_check;
 mod two_dimensional_parity_check;
 
